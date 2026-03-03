@@ -1,19 +1,19 @@
-# Branding Iframes - Proctor
+# Branding Iframes - EquiArena
 
-Documento de referencia para mantener consistente el branding del microfrontend de Proctor y su visualizacion embebida en iframe dentro del CRM.
+Documento de referencia para mantener consistente el branding del microfrontend de **EquiArena** y su visualizacion embebida en iframe dentro del CRM.
 
 ## Alcance
 
-- Microfrontend: `proctor-crm`
-- Shell embebedor: `crm-geofal` modulo Proctor
-- Flujo: CRM abre `https://proctor.geofal.com.pe` en dialog modal con `token` y opcionalmente `ensayo_id`
+- Microfrontend: `equi-arena-CRM`
+- Shell embebedor: `crm-geofal` modulo EquiArena
+- Flujo: CRM abre `https://equi-arena.geofal.com.pe` en dialog modal con `token` y opcionalmente `ensayo_id`
 
 ## Reglas visuales
 
-- Mantener la paleta y tipografia definida en `src/index.css`.
-- Reusar componentes base (`Section`, `Input`, `SelectField`) para consistencia con humedad/cbr.
-- Mantener el orden visual de la hoja oficial `Template_Proctor.xlsx` en el formulario web.
+- Mantener estilo tipo hoja tecnica, fiel a la plantilla Excel oficial de EquiArena.
+- Preservar estructura de encabezado institucional y bloque ASTM D2419-22.
 - Mantener botonera final con accion doble: `Guardar` y `Guardar y Descargar`.
+- Mantener consistencia visual con GE Fino, GE Grueso, Gran Suelo y Gran Agregado.
 
 ## Contrato iframe
 
@@ -23,7 +23,7 @@ Documento de referencia para mantener consistente el branding del microfrontend 
 
 ## Archivos clave
 
-- `proctor-crm/src/pages/ProctorForm.tsx`
-- `proctor-crm/src/App.tsx`
-- `proctor-crm/src/components/SessionGuard.tsx`
-- `crm-geofal/src/components/dashboard/proctor-module.tsx`
+- `equi-arena-CRM/src/pages/EquiArenaForm.tsx`
+- `equi-arena-CRM/src/App.tsx`
+- `equi-arena-CRM/src/components/SessionGuard.tsx`
+- `crm-geofal/src/components/dashboard/equi-arena-module.tsx`
