@@ -15,6 +15,21 @@ const PREPARACION = ["-", "PROCEDIMIENTO A", "PROCEDIMIENTO B"] as const
 const REVISORES = ["-", "FABIAN LA ROSA"] as const
 const APROBADORES = ["-", "IRMA COAQUIRA"] as const
 
+const EQUIPO_OPTIONS = {
+    equipo_balanza_01g_codigo: ["-"],
+    equipo_horno_110_codigo: ["-"],
+    equipo_equivalente_arena_codigo: ["-"],
+    equipo_agitador_ea_codigo: ["-"],
+    equipo_termometro_codigo: ["-"],
+    equipo_tamiz_no4_codigo: ["-"],
+} as const
+
+const withCurrentOption = (value: string | null | undefined, base: readonly string[]) => {
+    const current = (value ?? "").trim()
+    if (!current || base.includes(current)) return base
+    return [...base, current]
+}
+
 const initialState = (): EquiArenaPayload => ({
     muestra: "",
     numero_ot: "",
@@ -41,7 +56,7 @@ const initialState = (): EquiArenaPayload => ({
     revisado_por: "-",
     revisado_fecha: "",
     aprobado_por: "-",
-    aprobado_fecha: "",
+    aprobado_fecha: formatTodayShortDate(),
 })
 
 const parseNum = (v: unknown): number | null => {
@@ -51,6 +66,13 @@ const parseNum = (v: unknown): number | null => {
 }
 
 const getCurrentYearShort = () => new Date().getFullYear().toString().slice(-2)
+const formatTodayShortDate = () => {
+    const d = new Date()
+    const dd = String(d.getDate()).padStart(2, "0")
+    const mm = String(d.getMonth() + 1).padStart(2, "0")
+    const yy = String(d.getFullYear()).slice(-2)
+    return `${dd}/${mm}/${yy}`
+}
 
 const normalizeMuestraCode = (raw: string): string => {
     const value = raw.trim().toUpperCase()
@@ -467,12 +489,42 @@ export default function EquiArenaForm() {
                             <h2 className="text-sm font-semibold text-slate-900">Equipos y observaciones</h2>
                         </div>
                         <div className="p-4 grid md:grid-cols-2 gap-3">
-                            {renderText("Balanza 0.1 g", form.equipo_balanza_01g_codigo, (v) => setField("equipo_balanza_01g_codigo", v))}
-                            {renderText("Horno 110°C", form.equipo_horno_110_codigo, (v) => setField("equipo_horno_110_codigo", v))}
-                            {renderText("Equipo Equivalente Arena", form.equipo_equivalente_arena_codigo, (v) => setField("equipo_equivalente_arena_codigo", v))}
-                            {renderText("Agitador EA", form.equipo_agitador_ea_codigo, (v) => setField("equipo_agitador_ea_codigo", v))}
-                            {renderText("Termómetro", form.equipo_termometro_codigo, (v) => setField("equipo_termometro_codigo", v))}
-                            {renderText("Tamiz No. 4", form.equipo_tamiz_no4_codigo, (v) => setField("equipo_tamiz_no4_codigo", v))}
+                            {renderSelect(
+                                "Balanza 0.1 g",
+                                form.equipo_balanza_01g_codigo || "-",
+                                withCurrentOption(form.equipo_balanza_01g_codigo, EQUIPO_OPTIONS.equipo_balanza_01g_codigo),
+                                (v) => setField("equipo_balanza_01g_codigo", v),
+                            )}
+                            {renderSelect(
+                                "Horno 110°C",
+                                form.equipo_horno_110_codigo || "-",
+                                withCurrentOption(form.equipo_horno_110_codigo, EQUIPO_OPTIONS.equipo_horno_110_codigo),
+                                (v) => setField("equipo_horno_110_codigo", v),
+                            )}
+                            {renderSelect(
+                                "Equipo Equivalente Arena",
+                                form.equipo_equivalente_arena_codigo || "-",
+                                withCurrentOption(form.equipo_equivalente_arena_codigo, EQUIPO_OPTIONS.equipo_equivalente_arena_codigo),
+                                (v) => setField("equipo_equivalente_arena_codigo", v),
+                            )}
+                            {renderSelect(
+                                "Agitador EA",
+                                form.equipo_agitador_ea_codigo || "-",
+                                withCurrentOption(form.equipo_agitador_ea_codigo, EQUIPO_OPTIONS.equipo_agitador_ea_codigo),
+                                (v) => setField("equipo_agitador_ea_codigo", v),
+                            )}
+                            {renderSelect(
+                                "Termómetro",
+                                form.equipo_termometro_codigo || "-",
+                                withCurrentOption(form.equipo_termometro_codigo, EQUIPO_OPTIONS.equipo_termometro_codigo),
+                                (v) => setField("equipo_termometro_codigo", v),
+                            )}
+                            {renderSelect(
+                                "Tamiz No. 4",
+                                form.equipo_tamiz_no4_codigo || "-",
+                                withCurrentOption(form.equipo_tamiz_no4_codigo, EQUIPO_OPTIONS.equipo_tamiz_no4_codigo),
+                                (v) => setField("equipo_tamiz_no4_codigo", v),
+                            )}
                             <div className="md:col-span-2">
                                 {renderText("Observaciones", form.observaciones, (v) => setField("observaciones", v))}
                             </div>
