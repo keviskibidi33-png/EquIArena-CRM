@@ -277,7 +277,7 @@ export default function EquiArenaForm() {
             try {
                 const payload: EquiArenaPayload = {
                     ...form,
-                    equivalente_arena_promedio_pct: form.equivalente_arena_promedio_pct ?? equivalentAverage,
+                    equivalente_arena_promedio_pct: equivalentAverage,
                 }
 
                 if (download) {
@@ -476,20 +476,16 @@ export default function EquiArenaForm() {
                                     </tr>
                                     <tr>
                                         <td className="px-3 py-2 font-medium">EA promedio (%)</td>
-                                        <td className="px-2 py-2" colSpan={2}>
-                                            <input
-                                                type="number"
-                                                step="any"
-                                                value={form.equivalente_arena_promedio_pct ?? ""}
-                                                onChange={(e) => setField("equivalente_arena_promedio_pct", parseNum(e.target.value))}
-                                                placeholder={equivalentAverage != null ? String(equivalentAverage) : ""}
-                                                className="w-full h-8 px-2 rounded border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                                            />
+                                        <td className="px-2 py-2" colSpan={3}>
+                                            <div className="flex h-8 items-center justify-center rounded border border-slate-300 bg-slate-100 text-sm font-semibold text-slate-900">
+                                                {equivalentAverage ?? "-"}
+                                            </div>
+                                            <p className="mt-1 text-center text-[11px] text-slate-600">Calculado por sistema y bloqueado para edición.</p>
                                         </td>
-                                        <td className="px-2 py-2 text-center text-xs text-slate-600">{equivalentAverage != null ? `Auto: ${equivalentAverage}` : "Sin cálculo"}</td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <p className="mt-3 text-xs text-slate-600">EA por prueba y EA promedio se generan automáticamente a partir de las lecturas de arcilla y arena.</p>
                         </div>
                     </div>
 
@@ -572,7 +568,7 @@ export default function EquiArenaForm() {
                                 </tr>
                                 <tr>
                                     <td className="px-2 py-2">EA promedio</td>
-                                    <td className="px-2 py-2 text-right font-semibold">{form.equivalente_arena_promedio_pct ?? equivalentAverage ?? '-'}</td>
+                                    <td className="px-2 py-2 text-right font-semibold">{equivalentAverage ?? '-'}</td>
                                 </tr>
                             </tbody>
                         </table>
