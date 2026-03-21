@@ -29,19 +29,43 @@ const PREPARACION = ["-", "PROCEDIMIENTO A", "PROCEDIMIENTO B"] as const
 const REVISORES = ["-", "FABIAN LA ROSA"] as const
 const APROBADORES = ["-", "IRMA COAQUIRA"] as const
 
-const EQUIPO_OPTIONS = {
-    equipo_balanza_01g_codigo: ["-"],
-    equipo_horno_110_codigo: ["-"],
-    equipo_equivalente_arena_codigo: ["-"],
-    equipo_agitador_ea_codigo: ["-"],
-    equipo_termometro_codigo: ["-"],
-    equipo_tamiz_no4_codigo: ["-"],
-} as const
+type EquipoField =
+    | "equipo_balanza_01g_codigo"
+    | "equipo_horno_110_codigo"
+    | "equipo_equivalente_arena_codigo"
+    | "equipo_agitador_ea_codigo"
+    | "equipo_termometro_codigo"
+    | "equipo_tamiz_no4_codigo"
+
+const EQUIPO_OPTIONS: Record<EquipoField, readonly string[]> = {
+    equipo_balanza_01g_codigo: ["-", "EQP-0046"],
+    equipo_horno_110_codigo: ["-", "EQP-0049"],
+    equipo_equivalente_arena_codigo: ["-", "EQP-0028"],
+    equipo_agitador_ea_codigo: ["-", "EQP-0047"],
+    equipo_termometro_codigo: ["-", "INS-0153"],
+    equipo_tamiz_no4_codigo: ["-", "INS-0053"],
+}
+
+const EQUIPO_LABELS: Record<EquipoField, string> = {
+    equipo_balanza_01g_codigo: "Balanza 0.1 g",
+    equipo_horno_110_codigo: "Horno 110°C",
+    equipo_equivalente_arena_codigo: "Equipo Equivalente Arena",
+    equipo_agitador_ea_codigo: "Agitador EA",
+    equipo_termometro_codigo: "Termómetro",
+    equipo_tamiz_no4_codigo: "Tamiz No. 4",
+}
+
+const EQUIPO_FIELDS = Object.keys(EQUIPO_OPTIONS) as EquipoField[]
 
 const withCurrentOption = (value: string | null | undefined, base: readonly string[]) => {
     const current = (value ?? "").trim()
     if (!current || base.includes(current)) return base
     return [...base, current]
+}
+
+const isValidEquipmentCode = (field: EquipoField, value: string | null | undefined) => {
+    const current = (value ?? "-").trim() || "-"
+    return EQUIPO_OPTIONS[field].includes(current)
 }
 
 const initialState = (): EquiArenaPayload => ({
@@ -270,6 +294,12 @@ export default function EquiArenaForm() {
         async (download: boolean) => {
             if (!form.muestra || !form.numero_ot || !form.realizado_por) {
                 toast.error("Complete Muestra, N OT y Realizado por.")
+                return
+            }
+
+            const invalidEquipmentField = EQUIPO_FIELDS.find((field) => !isValidEquipmentCode(field, form[field]))
+            if (invalidEquipmentField) {
+                toast.error(`Seleccione un código válido para ${EQUIPO_LABELS[invalidEquipmentField]}.`)
                 return
             }
 
