@@ -433,7 +433,7 @@ export default function EquiArenaForm() {
                             {renderText("N° OT", form.numero_ot, (v) => setField("numero_ot", v), "4567-26", () =>
                                 applyFormattedField("numero_ot", normalizeNumeroOtCode),
                             )}
-                            {renderText("Fecha ensayo", form.fecha_ensayo, (v) => setField("fecha_ensayo", v), "DD/MM/AA", () =>
+                            {renderText("Fecha ensayo", form.fecha_ensayo, (v) => setField("fecha_ensayo", v), "YYYY/MM/DD", () =>
                                 applyFormattedField("fecha_ensayo", normalizeFlexibleDate),
                             )}
                             {renderText("Realizado por", form.realizado_por, (v) => setField("realizado_por", v))}
@@ -572,11 +572,11 @@ export default function EquiArenaForm() {
                         </div>
                         <div className="p-4 grid md:grid-cols-2 gap-3">
                             {renderSelect("Revisado por", form.revisado_por || "-", REVISORES, (v) => setField("revisado_por", v))}
-                            {renderText("Fecha revisión", form.revisado_fecha, (v) => setField("revisado_fecha", v), "DD/MM/AA", () =>
+                            {renderText("Fecha revisión", form.revisado_fecha, (v) => setField("revisado_fecha", v), "YYYY/MM/DD", () =>
                                 applyFormattedField("revisado_fecha", normalizeFlexibleDate),
                             )}
                             {renderSelect("Aprobado por", form.aprobado_por || "-", APROBADORES, (v) => setField("aprobado_por", v))}
-                            {renderText("Fecha aprobación", form.aprobado_fecha, (v) => setField("aprobado_fecha", v), "DD/MM/AA", () =>
+                            {renderText("Fecha aprobación", form.aprobado_fecha, (v) => setField("aprobado_fecha", v), "YYYY/MM/DD", () =>
                                 applyFormattedField("aprobado_fecha", normalizeFlexibleDate),
                             )}
                         </div>
