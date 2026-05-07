@@ -10,8 +10,12 @@ export interface EquiArenaPayload {
     temperatura_solucion_c?: number | null
     masa_4_medidas_g?: number | null
 
+    cronometro_entrada_saturacion_hmin: Array<string | null>
+    cronometro_salida_saturacion_hmin: Array<string | null>
     tiempo_saturacion_min: Array<number | null>
     tiempo_agitacion_seg: Array<number | null>
+    cronometro_entrada_decantacion_hmin: Array<string | null>
+    cronometro_salida_decantacion_hmin: Array<string | null>
     tiempo_decantacion_min: Array<number | null>
     lectura_arcilla_in: Array<number | null>
     lectura_arena_in: Array<number | null>

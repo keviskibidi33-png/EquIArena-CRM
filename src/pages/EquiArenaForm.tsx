@@ -78,8 +78,12 @@ const initialState = (): EquiArenaPayload => ({
     preparacion_muestra: "-",
     temperatura_solucion_c: null,
     masa_4_medidas_g: null,
+    cronometro_entrada_saturacion_hmin: [null, null, null],
+    cronometro_salida_saturacion_hmin: [null, null, null],
     tiempo_saturacion_min: [10, 10, 10],
     tiempo_agitacion_seg: [45, 45, 45],
+    cronometro_entrada_decantacion_hmin: [null, null, null],
+    cronometro_salida_decantacion_hmin: [null, null, null],
     tiempo_decantacion_min: [20, 20, 20],
     lectura_arcilla_in: [null, null, null],
     lectura_arena_in: [null, null, null],
@@ -169,6 +173,27 @@ const normalizeFlexibleDate = (raw: string): string => {
     return value
 }
 
+const normalizeFlexibleTime = (raw: string): string => {
+    const value = raw.trim()
+    if (!value) return ''
+
+    const compact = value.replace(/\s+/g, '').replace(/[.]/g, ':')
+    const split = compact.split(':')
+    if (split.length >= 2 && split[0] && split[1]) {
+        const hours = split[0].padStart(2, '0').slice(-2)
+        const minutes = split[1].padStart(2, '0').slice(-2)
+        return `${hours}:${minutes}`
+    }
+
+    const digits = compact.replace(/\D/g, '')
+    if (digits.length === 1) return `0${digits}:00`
+    if (digits.length === 2) return `${digits.padStart(2, '0')}:00`
+    if (digits.length === 3) return `0${digits[0]}:${digits.slice(1, 3)}`
+    if (digits.length === 4) return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`
+
+    return value
+}
+
 const getEnsayoId = (): number | null => {
     const raw = new URLSearchParams(window.location.search).get("ensayo_id")
     if (!raw) return null
@@ -178,6 +203,11 @@ const getEnsayoId = (): number | null => {
 
 type FormattedFieldKey = "muestra" | "numero_ot" | "fecha_ensayo" | "revisado_fecha" | "aprobado_fecha"
 type TrialFieldKey = "tiempo_saturacion_min" | "tiempo_agitacion_seg" | "tiempo_decantacion_min" | "lectura_arcilla_in" | "lectura_arena_in"
+type TrialTextFieldKey =
+    | "cronometro_entrada_saturacion_hmin"
+    | "cronometro_salida_saturacion_hmin"
+    | "cronometro_entrada_decantacion_hmin"
+    | "cronometro_salida_decantacion_hmin"
 
 export default function EquiArenaForm() {
     const [form, setForm] = useState<EquiArenaPayload>(() => initialState())
@@ -221,6 +251,32 @@ export default function EquiArenaForm() {
         })
     }, [])
 
+    const setTrialTextValue = useCallback((key: TrialTextFieldKey, index: number, raw: string) => {
+        setForm((prev) => {
+            const next = [...prev[key]]
+            next[index] = raw ? raw : null
+            return { ...prev, [key]: next }
+        })
+    }, [])
+
+    const normalizeTextTrialArray = useCallback((values: Array<string | null | undefined> | undefined | null) => {
+        const source = Array.isArray(values) ? values : []
+        return Array.from({ length: TRIAL_COUNT }, (_, idx) => {
+            const normalized = normalizeFlexibleTime(String(source[idx] ?? ""))
+            return normalized || null
+        })
+    }, [])
+
+    const normalizeNumberTrialArray = useCallback((values: Array<number | null | undefined> | undefined | null, fallback: Array<number | null>) => {
+        const source = Array.isArray(values) ? values : []
+        return Array.from({ length: TRIAL_COUNT }, (_, idx) => {
+            const value = source[idx]
+            if (value === null || value === undefined || value === "") return fallback[idx] ?? null
+            const numeric = Number(value)
+            return Number.isFinite(numeric) ? numeric : fallback[idx] ?? null
+        })
+    }, [])
+
     useEffect(() => {
         const raw = localStorage.getItem(`${DRAFT_KEY}:${editingEnsayoId ?? "new"}`)
         if (!raw) return
@@ -229,21 +285,15 @@ export default function EquiArenaForm() {
             setForm({
                 ...initialState(),
                 ...parsed,
-                tiempo_saturacion_min: Array.isArray(parsed.tiempo_saturacion_min)
-                    ? [...parsed.tiempo_saturacion_min.slice(0, TRIAL_COUNT), ...Array(TRIAL_COUNT).fill(null)].slice(0, TRIAL_COUNT)
-                    : [10, 10, 10],
-                tiempo_agitacion_seg: Array.isArray(parsed.tiempo_agitacion_seg)
-                    ? [...parsed.tiempo_agitacion_seg.slice(0, TRIAL_COUNT), ...Array(TRIAL_COUNT).fill(null)].slice(0, TRIAL_COUNT)
-                    : [45, 45, 45],
-                tiempo_decantacion_min: Array.isArray(parsed.tiempo_decantacion_min)
-                    ? [...parsed.tiempo_decantacion_min.slice(0, TRIAL_COUNT), ...Array(TRIAL_COUNT).fill(null)].slice(0, TRIAL_COUNT)
-                    : [20, 20, 20],
-                lectura_arcilla_in: Array.isArray(parsed.lectura_arcilla_in)
-                    ? [...parsed.lectura_arcilla_in.slice(0, TRIAL_COUNT), ...Array(TRIAL_COUNT).fill(null)].slice(0, TRIAL_COUNT)
-                    : [null, null, null],
-                lectura_arena_in: Array.isArray(parsed.lectura_arena_in)
-                    ? [...parsed.lectura_arena_in.slice(0, TRIAL_COUNT), ...Array(TRIAL_COUNT).fill(null)].slice(0, TRIAL_COUNT)
-                    : [null, null, null],
+                cronometro_entrada_saturacion_hmin: normalizeTextTrialArray(parsed.cronometro_entrada_saturacion_hmin),
+                cronometro_salida_saturacion_hmin: normalizeTextTrialArray(parsed.cronometro_salida_saturacion_hmin),
+                tiempo_saturacion_min: normalizeNumberTrialArray(parsed.tiempo_saturacion_min, [10, 10, 10]),
+                tiempo_agitacion_seg: normalizeNumberTrialArray(parsed.tiempo_agitacion_seg, [45, 45, 45]),
+                cronometro_entrada_decantacion_hmin: normalizeTextTrialArray(parsed.cronometro_entrada_decantacion_hmin),
+                cronometro_salida_decantacion_hmin: normalizeTextTrialArray(parsed.cronometro_salida_decantacion_hmin),
+                tiempo_decantacion_min: normalizeNumberTrialArray(parsed.tiempo_decantacion_min, [20, 20, 20]),
+                lectura_arcilla_in: normalizeNumberTrialArray(parsed.lectura_arcilla_in, [null, null, null]),
+                lectura_arena_in: normalizeNumberTrialArray(parsed.lectura_arena_in, [null, null, null]),
             })
         } catch {
             // ignore draft corruption
@@ -269,11 +319,15 @@ export default function EquiArenaForm() {
                     setForm({
                         ...initialState(),
                         ...detail.payload,
-                        tiempo_saturacion_min: [...(detail.payload.tiempo_saturacion_min || [])].slice(0, TRIAL_COUNT),
-                        tiempo_agitacion_seg: [...(detail.payload.tiempo_agitacion_seg || [])].slice(0, TRIAL_COUNT),
-                        tiempo_decantacion_min: [...(detail.payload.tiempo_decantacion_min || [])].slice(0, TRIAL_COUNT),
-                        lectura_arcilla_in: [...(detail.payload.lectura_arcilla_in || [])].slice(0, TRIAL_COUNT),
-                        lectura_arena_in: [...(detail.payload.lectura_arena_in || [])].slice(0, TRIAL_COUNT),
+                        cronometro_entrada_saturacion_hmin: normalizeTextTrialArray(detail.payload.cronometro_entrada_saturacion_hmin),
+                        cronometro_salida_saturacion_hmin: normalizeTextTrialArray(detail.payload.cronometro_salida_saturacion_hmin),
+                        tiempo_saturacion_min: normalizeNumberTrialArray(detail.payload.tiempo_saturacion_min, [10, 10, 10]),
+                        tiempo_agitacion_seg: normalizeNumberTrialArray(detail.payload.tiempo_agitacion_seg, [45, 45, 45]),
+                        cronometro_entrada_decantacion_hmin: normalizeTextTrialArray(detail.payload.cronometro_entrada_decantacion_hmin),
+                        cronometro_salida_decantacion_hmin: normalizeTextTrialArray(detail.payload.cronometro_salida_decantacion_hmin),
+                        tiempo_decantacion_min: normalizeNumberTrialArray(detail.payload.tiempo_decantacion_min, [20, 20, 20]),
+                        lectura_arcilla_in: normalizeNumberTrialArray(detail.payload.lectura_arcilla_in, [null, null, null]),
+                        lectura_arena_in: normalizeNumberTrialArray(detail.payload.lectura_arena_in, [null, null, null]),
                     })
                 }
             } catch {
@@ -397,6 +451,17 @@ export default function EquiArenaForm() {
     )
 
     const trialHeader = ["Prueba 1", "Prueba 2", "Prueba 3"]
+    const officialTrialRows = [
+        { key: "cronometro_entrada_saturacion_hmin" as const, label: "Lectura cronómetro de entrada a saturación", kind: "text" as const },
+        { key: "cronometro_salida_saturacion_hmin" as const, label: "Lectura cronómetro: salida de saturación", kind: "text" as const },
+        { key: "tiempo_saturacion_min" as const, label: "Tiempo saturación (min)", kind: "number" as const },
+        { key: "tiempo_agitacion_seg" as const, label: "Tiempo agitación (seg)", kind: "number" as const },
+        { key: "cronometro_entrada_decantacion_hmin" as const, label: "Lectura cronómetro: entrada a decantación", kind: "text" as const },
+        { key: "cronometro_salida_decantacion_hmin" as const, label: "Lectura cronómetro: salida de decantación", kind: "text" as const },
+        { key: "tiempo_decantacion_min" as const, label: "Tiempo decantación (min)", kind: "number" as const },
+        { key: "lectura_arcilla_in" as const, label: "Lectura de arcilla (in)", kind: "number" as const },
+        { key: "lectura_arena_in" as const, label: "Lectura de arena (in)", kind: "number" as const },
+    ]
 
     return (
         <div className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -466,10 +531,10 @@ export default function EquiArenaForm() {
 
                     <div className="border border-slate-300 bg-white shadow-sm">
                         <div className="px-4 py-2.5 border-b border-slate-300 bg-slate-100">
-                            <h2 className="text-sm font-semibold text-slate-900">Pruebas (H-I-J)</h2>
+                            <h2 className="text-sm font-semibold text-slate-900">Pruebas oficiales (A-J)</h2>
                         </div>
                         <div className="p-4 overflow-x-auto">
-                            <table className="w-full min-w-[760px] text-sm border border-slate-300 rounded-lg overflow-hidden">
+                            <table className="w-full min-w-[1020px] text-sm border border-slate-300 rounded-lg overflow-hidden">
                                 <thead className="bg-slate-100">
                                     <tr>
                                         <th className="text-left px-3 py-2 border-b border-slate-300">Campo</th>
@@ -481,24 +546,35 @@ export default function EquiArenaForm() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        { key: "tiempo_saturacion_min", label: "Tiempo saturación (min)" },
-                                        { key: "tiempo_agitacion_seg", label: "Tiempo agitación (seg)" },
-                                        { key: "tiempo_decantacion_min", label: "Tiempo decantación (min)" },
-                                        { key: "lectura_arcilla_in", label: "Lectura de arcilla (in)" },
-                                        { key: "lectura_arena_in", label: "Lectura de arena (in)" },
-                                    ].map((row) => (
+                                    {officialTrialRows.map((row) => (
                                         <tr key={row.key} className="border-b border-slate-300 last:border-none">
                                             <td className="px-3 py-2 font-medium">{row.label}</td>
                                             {Array.from({ length: TRIAL_COUNT }, (_, idx) => (
                                                 <td key={idx} className="px-2 py-2">
-                                                    <input
-                                                        type="number"
-                                                        step="any"
-                                                        value={(form[row.key as TrialFieldKey][idx] as number | null) ?? ""}
-                                                        onChange={(e) => setTrialValue(row.key as TrialFieldKey, idx, e.target.value)}
-                                                        className="w-full h-8 px-2 rounded border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                                                    />
+                                                    {row.kind === "number" ? (
+                                                        <input
+                                                            type="number"
+                                                            step="any"
+                                                            value={(form[row.key as TrialFieldKey][idx] as number | null) ?? ""}
+                                                            onChange={(e) => setTrialValue(row.key as TrialFieldKey, idx, e.target.value)}
+                                                            className="w-full h-8 px-2 rounded border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                                        />
+                                                    ) : (
+                                                        <input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            value={(form[row.key as TrialTextFieldKey][idx] as string | null) ?? ""}
+                                                            onChange={(e) => setTrialTextValue(row.key as TrialTextFieldKey, idx, e.target.value)}
+                                                            onBlur={(e) => {
+                                                                const normalized = normalizeFlexibleTime(e.target.value)
+                                                                setTrialTextValue(row.key as TrialTextFieldKey, idx, normalized)
+                                                            }}
+                                                            placeholder="08:00"
+                                                            autoComplete="off"
+                                                            data-lpignore="true"
+                                                            className="w-full h-8 px-2 rounded border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                                                        />
+                                                    )}
                                                 </td>
                                             ))}
                                         </tr>
@@ -667,4 +743,3 @@ export default function EquiArenaForm() {
         </div>
     )
 }
-
