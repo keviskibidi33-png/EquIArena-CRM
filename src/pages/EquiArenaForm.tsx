@@ -182,14 +182,17 @@ const normalizeFlexibleTime = (raw: string): string => {
     if (split.length >= 2 && split[0] && split[1]) {
         const hours = split[0].padStart(2, '0').slice(-2)
         const minutes = split[1].padStart(2, '0').slice(-2)
-        return `${hours}:${minutes}`
+        const seconds = split[2] ? split[2].padStart(2, '0').slice(-2) : '00'
+        return `${hours}:${minutes}:${seconds}`
     }
 
     const digits = compact.replace(/\D/g, '')
-    if (digits.length === 1) return `0${digits}:00`
-    if (digits.length === 2) return `${digits.padStart(2, '0')}:00`
-    if (digits.length === 3) return `0${digits[0]}:${digits.slice(1, 3)}`
-    if (digits.length === 4) return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`
+    if (digits.length === 1) return `0${digits}:00:00`
+    if (digits.length === 2) return `${digits.padStart(2, '0')}:00:00`
+    if (digits.length === 3) return `0${digits[0]}:${digits.slice(1, 3)}:00`
+    if (digits.length === 4) return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:00`
+    if (digits.length === 5) return `0${digits[0]}:${digits.slice(1, 3)}:${digits.slice(3, 5)}`
+    if (digits.length === 6) return `${digits.slice(0, 2)}:${digits.slice(2, 4)}:${digits.slice(4, 6)}`
 
     return value
 }
@@ -569,7 +572,7 @@ export default function EquiArenaForm() {
                                                                 const normalized = normalizeFlexibleTime(e.target.value)
                                                                 setTrialTextValue(row.key as TrialTextFieldKey, idx, normalized)
                                                             }}
-                                                            placeholder="08:00"
+                                                            placeholder="08:00:00"
                                                             autoComplete="off"
                                                             data-lpignore="true"
                                                             className="w-full h-8 px-2 rounded border border-input bg-white text-sm focus:outline-none focus:ring-1 focus:ring-ring"
